@@ -4,12 +4,11 @@
 #include "tinyxml2.h"
 using std::cout; using std::endl;
 using namespace tinyxml2;
-using std::regex;
 
 /* 将src中所有的<...>过滤掉 */
 void regexFilter(const string &src, string &des) {
     string pattern = "<.*?>"; //.*?的目的是采用最短匹配
-    regex reg(pattern);
+    std::regex reg(pattern);
     des = regex_replace(src, reg, ""); //将<与>之间包括<>全部替换为""
 }
 
@@ -42,10 +41,6 @@ bool RssReader::parseRss(const char *xmlPath) {
         }
 
         tmpNode = item->FirstChildElement("content:encoded");
-        if(nullptr == tmpNode) {
-            tmpNode = item->FirstChildElement("content");
-        }
-
         if(nullptr != tmpNode) {
             //使用正则表达式过滤无用的数据
             regexFilter(tmpNode->GetText(), tmpItem.content); 
@@ -62,10 +57,6 @@ bool RssReader::parseRss(const char *xmlPath) {
 
 bool RssReader::dump(const char *libname) {
     XMLDocument docs;
-   // if(XML_SUCCESS != docs.LoadFile(libname)) {
-   //     cout << "Error: create XML file failed!" << endl;
-   //     return false;
-   // }
    
     XMLElement *node;
     XMLElement *doc;
