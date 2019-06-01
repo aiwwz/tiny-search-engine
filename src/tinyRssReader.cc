@@ -1,7 +1,7 @@
 #include <iostream>
 #include <regex>
-#include "RssReader.h"
-#include "tinyxml2.h"
+#include "../include/tinyRssReader.h"
+#include "../include/tinyxml2.h"
 using std::cout; using std::endl;
 using namespace tinyxml2;
 
@@ -12,7 +12,7 @@ void regexFilter(const string &src, string &des) {
     des = regex_replace(src, reg, ""); //将<与>之间包括<>全部替换为""
 }
 
-bool RssReader::parseRss(const char *xmlPath) {
+bool tinyRssReader::parseRss(const char *xmlPath) {
     //加载待解析xml文件
     XMLDocument doc;
     if(XML_SUCCESS != doc.LoadFile(xmlPath)) {
@@ -55,7 +55,7 @@ bool RssReader::parseRss(const char *xmlPath) {
     return true;
 }
 
-bool RssReader::dump(const char *libname) {
+bool tinyRssReader::dump(const char *libname) {
     XMLDocument docs;
    
     XMLElement *node;
@@ -92,13 +92,13 @@ bool RssReader::dump(const char *libname) {
 
 
 int main(){
-    RssReader rssReader;
+    tinyRssReader rssReader;
     if(!rssReader.parseRss("coolshell.xml")) {
         cout << "parse failed!" << endl;
         exit(1);
     }
 
-    if(!rssReader.dump("pagelib.dat")) {
+    if(!rssReader.dump("../data/pagelib.dat")) {
         cout << "save file failed!" << endl;
         exit(1);
     }
