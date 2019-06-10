@@ -7,25 +7,24 @@
 #define __MUTEXLOCK_H__
 #include "Uncopyable.h"
 #include <pthread.h>
-#include <assert.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/syscall.h>
-#include <iostream>
-using namespace std;
+#include <cstdio>
 
 namespace tinyse {
 
+/* 封装互斥锁mutex */
 class MutexLock : tinyse::Uncopyable {
     friend class MutexLockGuard;
 public:
-    MutexLock() : m_holder_pid(0) {
-        pthread_mutex_init(&m_mutex, nullptr);
+    MutexLock() {
+        if(pthread_mutex_init(&m_mutex, nullptr)) {
+            perror("MutexLock.h: pthread_mutex_init");
+        }
     }
 
     ~MutexLock() {
-        assert(0 == m_holder_pid);
-        pthread_mutex_destroy(&m_mutex);
+        if(pthread_mutex_destroy(&m_mutex)) {
+            perror("MutexLock.h: pthread_mutex_destroy");
+        }
     }
 
     pthread_mutex_t *getMutex() {
@@ -35,24 +34,22 @@ public:
 protected:
     /* 只能由MutexLockGuard调用, 防止用户代码调用 */
     void lock() {
-        pthread_mutex_lock(&m_mutex);
-        m_holder_pid = gettid();
+        if(pthread_mutex_lock(&m_mutex)) {
+            perror("MutexLock.h: pthread_mutex_lock");
+        }
     }
 
     void unlock() {
-        m_holder_pid = 0;
-        pthread_mutex_unlock(&m_mutex);
-    }
-
-    pid_t gettid() {
-        return syscall(SYS_gettid);
+        if(pthread_mutex_unlock(&m_mutex)) {
+            perror("MutexLock.h: pthread_mutex_unlock");
+        }
     }
 
 private:
     pthread_mutex_t m_mutex;
-    pid_t m_holder_pid; //当前持有lock的线程id
 };
 
+/* 通过对象生命周期自动加/解锁 */
 class MutexLockGuard : tinyse::Uncopyable {
 public:
     explicit MutexLockGuard(MutexLock &mutex) : m_mutex(mutex) {

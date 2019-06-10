@@ -8,29 +8,40 @@
 #include <pthread.h>
 #include "Uncopyable.h"
 #include "MutexLock.h"
- 
+#include <cstdio>
+
 namespace tinyse {
 
 class Condition : tinyse::Uncopyable {
 public:
     explicit Condition(MutexLock &mutex) : m_mutex(mutex) {
-        pthread_cond_init(&m_cond, nullptr);
+        if(pthread_cond_init(&m_cond, nullptr)) {
+            perror("Condition.h: pthread_cond_init");
+        }
     }
 
     ~Condition() {
-        pthread_cond_destroy(&m_cond);
+        if(pthread_cond_destroy(&m_cond)) {
+            perror("Condition.h: pthread_cond_destroy");
+        }
     }
 
     void signal() {
-        pthread_cond_signal(&m_cond);
+        if(pthread_cond_signal(&m_cond)) {
+            perror("Condition.h: pthread_cond_signal");
+        }
     }
 
     void broadcast() {
-        pthread_cond_broadcast(&m_cond);
+        if(pthread_cond_broadcast(&m_cond)) {
+            perror("Condition.h: pthread_cond_broadcast");
+        }
     }
 
     void wait() {
-        pthread_cond_wait(&m_cond, m_mutex.getMutex());
+        if(pthread_cond_wait(&m_cond, m_mutex.getMutex())) {
+            perror("Condition.h: pthread_cond_wait");
+        }
     }
 
 private:
