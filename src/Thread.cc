@@ -3,7 +3,8 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-06-10 20:20:26
 **********************************************/
-#include "Thread.h"
+#include "../include/Thread.h"
+//#include "../include/CurrentThread.h"
 #include <cstdio>
 #include <unistd.h>
 #include <syscall.h>
@@ -40,15 +41,11 @@ void Thread::join() {
 
 void* Thread::threadFunc(void *obj) {
     Thread *thd = static_cast<Thread*>(obj);
-    thd->m_tid = thd->gettid(); //设置当前线程id
+    thd->m_tid = pthread_self(); //设置当前线程id
     if(nullptr != thd) {
         thd->m_func();
     }
     return nullptr;
-}
-
-pid_t Thread::gettid() const {
-    return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
 pid_t Thread::tid() const {

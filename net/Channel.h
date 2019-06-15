@@ -5,11 +5,13 @@
 **********************************************/
 #ifndef __CHANNEL_H__
 #define __CHANNEL_H__
-#include "../include/Config.h"
 #include "Uncopyable.h"
 #include <functional>
+#include <iostream>
+using namespace std;
 
-BEGIN_NAMESPACE_NET 
+namespace tinyse {
+namespace net {
 
 class EventLoop;
 
@@ -39,10 +41,18 @@ public:
     void handleEvent();
     void enableReading() {
         m_events |= kReadEvent;
+        cout << "Channel::enableReading()" << endl;
         update();
     }
-    //void enableWriting();
-    //void enableAll();
+    void enableWriting() {
+        m_events |= kWriteEvent;
+        update();
+    }
+
+    void enableAll() {
+        m_events = kReadEvent | kWriteEvent;
+        update();
+    }
     
     int fd() const {
         return m_fd;
@@ -74,7 +84,7 @@ public:
     }
 
 private:
-    void update();
+    void update(); //将当前Channel更新到所属EventLoop
 
 private:
     static const int kNoneEvent;
@@ -86,12 +96,13 @@ private:
     EventCallback m_errorCallback;
 
     EventLoop  *m_loop;
-    const int   m_fd;
+    const int   m_fd;      //负责该文件描述符的I/O事件分发
     int         m_events;  //关注的I/O事件
     int         m_revents; //当前活动的事件
-    int         m_index;   //
+    int         m_index;   //该Channel在poolfds中的下标
 };
 
-END_NAMESPACE_NET
+} //end of namespace net
+} //end of namespace tinyse
  
 #endif /* __CHANNEL_H__ */

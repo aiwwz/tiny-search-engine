@@ -28,8 +28,6 @@ public:
 
 private:
     static void* threadFunc(void*);
-    pid_t gettid() const;
-
 private:
     bool m_started;
     pthread_t m_pthid;

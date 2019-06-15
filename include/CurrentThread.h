@@ -12,9 +12,10 @@
 
 BEGIN_NAMESPACE_TINYSE
 
-pid_t gettid() { //待优化: 每次获取tid都要系统调用
-    return syscall(SYS_gettid);
+pid_t gettid() {
+    return syscall(SYS_gettid); 
 }
+
 
 END_NAMESPACE_TINYSE
  
