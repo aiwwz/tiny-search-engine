@@ -20,7 +20,7 @@ void printTid() {
 }
 
 void print(const char* msg) {
-    printf("msg %s %s\n", tinyse::Timestamp::now().toString().c_str(), msg);
+    printf("%d -- msg %s %s\n", cnt, tinyse::Timestamp::now().toString().c_str(), msg);
     if (++cnt == 20) {
         g_loop->quit();
     }
@@ -32,7 +32,7 @@ int main() {
     g_loop = &loop;
 
     print("main");
-    loop.runAfter(1, std::bind(print, "once1"));
+    loop.runAfter(3, std::bind(print, "once1"));
     loop.runAfter(1.5, std::bind(print, "once1.5"));
     loop.runAfter(2.5, std::bind(print, "once2.5"));
     loop.runAfter(3.5, std::bind(print, "once3.5"));

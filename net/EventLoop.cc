@@ -11,6 +11,7 @@
 #include <sys/poll.h>
 //#include "../include/tinyLogger.h"
 #include <iostream>
+#include <sys/eventfd.h>
 using namespace tinyse;
 using namespace tinyse::net;
 using std::cout;  using std::endl;
@@ -18,10 +19,22 @@ using std::cout;  using std::endl;
 //__thread变量每个线程有一份独立实体, 各个线程互不干扰
 __thread EventLoop *p_eventLoopOfCurrentThread = nullptr;
 
+static int createEventfd() {
+    int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if(evtfd < 0) {
+        perror("EventLoop::eventfd");
+        abort();
+    }
+    return evtfd;
+}
+
 EventLoop::EventLoop()
     : m_looping(false)
     , m_threadID(pthread_self())
-    , m_poller(new Poller(this)){ 
+    , m_poller(new Poller(this))
+    , m_timerQueue(new TimerQueue(this))
+    , m_wakeupFd(createEventfd())
+    , m_wakeupChannel(new Channel(this, m_wakeupFd)){ 
     if(p_eventLoopOfCurrentThread) {
         cout << "Error: 该线程 " << m_threadID 
              << " 已存在其他EventLoop: " << p_eventLoopOfCurrentThread << endl;
@@ -31,6 +44,8 @@ EventLoop::EventLoop()
     else {
         p_eventLoopOfCurrentThread = this;
     }
+    m_wakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
+    m_wakeupChannel->enableReading();
 }
 
 EventLoop::~EventLoop() {
@@ -39,7 +54,6 @@ EventLoop::~EventLoop() {
 }
 
 void EventLoop::assertInLoopThread() const {
-    cout << "EventLoop::assertInLoopThread()" << endl;
     if(!isInLoopThread()) {
         abortNotInLoopThread();
     }
@@ -61,12 +75,11 @@ void EventLoop::loop() {
 
     while(!m_quit) {
         m_activeChannels.clear();
-        cout << "Before poll" << endl;
-        m_poller->poll(10000, &m_activeChannels);
-        cout << "After poll" << endl;
+        m_pollRuntime = m_poller->poll(10000, &m_activeChannels);
         for(auto &it : m_activeChannels) {
             it->handleEvent();
         }
+        doPendingFunctors();
     }
     cout << "EventLoop " << this << " stop looping" << endl;
     m_looping = false;
@@ -78,7 +91,6 @@ void EventLoop::abortNotInLoopThread() const {
 }
 
 void EventLoop::updateChannel(Channel *channel) {
-    cout << "EventLoop::updateChannel()" << endl;
     assert(channel->ownerLoop() == this);
     assertInLoopThread();
     m_poller->updateChannel(channel);
@@ -86,5 +98,29 @@ void EventLoop::updateChannel(Channel *channel) {
 
 void EventLoop::quit() {
     m_quit = true;
-    //wakeup();
+    if(!isInLoopThread()) {
+        wakeup();
+    }
+}
+
+void EventLoop::handleRead() {
+    uint64_t one;
+    ssize_t n = ::read(m_wakeupFd, &one, sizeof one);
+    if (n != sizeof one) {
+        perror("EventLoop: read");       
+    }
+}
+
+void EventLoop::doPendingFunctors() {
+    std::vector<Functor> functors;
+    m_callingPendingFuntors = true;
+    {
+        MutexLockGuard lock(m_mutex);
+        functors.swap(m_pendingFunctors);
+    }
+
+    for(auto &cb : functors) {
+        cb();
+    }
+    m_callingPendingFuntors = false;
 }

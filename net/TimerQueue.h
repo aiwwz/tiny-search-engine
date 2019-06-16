@@ -12,6 +12,7 @@
 #include "Channel.h"
 #include "Uncopyable.h"
 #include "../include/Timestamp.h"
+#include <stdio.h>
 
 namespace tinyse {
 namespace net {
@@ -27,6 +28,10 @@ public:
         , m_expiration(when)
         , m_interval(interval)
         , m_repeat(interval > 0) { }
+
+    ~Timer() {
+        cout << "~Timer()!!!" << endl;
+    }
     
     void run() const {
         m_timerCallback();
@@ -60,9 +65,12 @@ private:
 class TimerID {
 public:
     TimerID(Timer *timer) : m_timer(timer) { } 
+    ~TimerID() {
+        cout << "~TimerID()!!!!!!!!!!!!" << endl;
+    }
     
 private:
-    unique_ptr<Timer> m_timer;
+    Timer *m_timer;
 };
 
 
@@ -74,6 +82,7 @@ public:
     ~TimerQueue();
 
     TimerID addTimer(const TimerCallback &cb, Timestamp when, double interval); 
+    void addTimerInLoop(Timer *timer);
     void cancel(TimerID timerID);
 
 private:

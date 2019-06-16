@@ -6,6 +6,7 @@
 #ifndef __POLLER_H__
 #define __POLLER_H__
 #include "Uncopyable.h"
+#include "../include/Timestamp.h"
 #include <vector>
 #include <map>
 
@@ -26,7 +27,7 @@ public:
     Poller(EventLoop *loop);
     ~Poller();
 
-    void poll(int timeoutMs, ChannelList *activeChannels);
+    Timestamp poll(int timeoutMs, ChannelList *activeChannels);
     void updateChannel(Channel *channel);
     void removeChannel(Channel *channel);
 

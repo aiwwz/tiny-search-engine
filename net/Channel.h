@@ -41,7 +41,6 @@ public:
     void handleEvent();
     void enableReading() {
         m_events |= kReadEvent;
-        cout << "Channel::enableReading()" << endl;
         update();
     }
     void enableWriting() {

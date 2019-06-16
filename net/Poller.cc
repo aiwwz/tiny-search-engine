@@ -10,14 +10,16 @@
 #include <assert.h>
 #include <iostream>
 using namespace std;
+using namespace tinyse;
 using namespace tinyse::net;
 
 Poller::Poller(EventLoop *loop) : m_ownerLoop(loop) { }
 
 Poller::~Poller() { }
 
-void Poller::poll(int timeoutMs, ChannelList *activeChannels) {
+Timestamp Poller::poll(int timeoutMs, ChannelList *activeChannels) {
     int numEvents = ::poll(&*m_pollfds.begin(), m_pollfds.size(), timeoutMs);
+    Timestamp now(Timestamp::now());
     if(numEvents > 0) {
         cout << numEvents << " events hanppended" << endl;
         fillActiveChannels(numEvents, activeChannels);
@@ -28,26 +30,26 @@ void Poller::poll(int timeoutMs, ChannelList *activeChannels) {
     else {
         cout << "Error: Poller::poll()" << endl;
     }
+    return now;
 }
 
 void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
-    for(auto &it : m_pollfds) {
-        if(it.revents > 0) {
+    for(auto pfd = m_pollfds.begin(); pfd != m_pollfds.end() && numEvents > 0; ++pfd) {
+        if(pfd->revents > 0) {
             --numEvents; //避免做无用功
-            auto ch = m_channels.find(it.fd);
+            cout << "Poller::fillActiveChannels::active Fd = " << pfd->fd << endl;
+            auto ch = m_channels.find(pfd->fd);
             assert(ch != m_channels.end());
             Channel *channel = ch->second;
-            assert(channel->fd() == it.fd);
-            channel->setRevents(it.revents);
+            assert(channel->fd() == pfd->fd);
+            channel->setRevents(pfd->revents);
             activeChannels->push_back(channel);
         }
     } 
 }
 
 void Poller::updateChannel(Channel *channel) {
-    cout << "Poller::updateChannel()" << endl;
     assertInLoopThread();
-    cout << "Poller::2" << endl;
     cout << "fd = " << channel->fd() << " events = " << channel->events() << endl;
     if(channel->index() < 0) { //添加新Channel
         assert(m_channels.find(channel->fd()) == m_channels.end());
@@ -76,8 +78,6 @@ void Poller::updateChannel(Channel *channel) {
 }
 
 void Poller::assertInLoopThread() {
-    cout << "Poller1::assertInLoopThread()" << endl;
     m_ownerLoop->assertInLoopThread();
-    cout << "Poller2::assertInLoopThread()" << endl;
 }
 

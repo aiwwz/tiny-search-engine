@@ -7,6 +7,8 @@
 #define __TIMESTAMP_H__
 #include <stdint.h> //for int64_t
 #include <string>
+#include <iostream>
+using std::cout;  using std::endl;
  
 namespace tinyse {
 
