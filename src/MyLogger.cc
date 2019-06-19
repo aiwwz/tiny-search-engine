@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/tinyLogger.h"
+#include "../include/MyLogger.h"
 #include <log4cpp/PropertyConfigurator.hh>
 using namespace log4cpp;
 

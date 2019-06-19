@@ -3,9 +3,9 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-06-14 16:41:54
 **********************************************/
-#include "EventLoop.h"
-#include "Channel.h"
-#include "Poller.h"
+#include "../include/EventLoop.h"
+#include "../include/Channel.h"
+#include "../include/Poller.h"
 #include <pthread.h>
 #include <assert.h>
 #include <sys/poll.h>

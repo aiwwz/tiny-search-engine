@@ -3,7 +3,7 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-06-10 20:45:12
 **********************************************/
-#include "TaskQueue.h"
+#include "../include/TaskQueue.h"
 using namespace tinyse;
 
 namespace tinyse {

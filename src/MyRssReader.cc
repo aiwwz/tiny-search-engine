@@ -1,6 +1,6 @@
 #include <iostream>
 #include <regex>
-#include "../include/tinyRssReader.h"
+#include "../include/MyRssReader.h"
 #include "../include/tinyxml2.h"
 using std::cout; using std::endl;
 using namespace tinyxml2;
@@ -93,7 +93,7 @@ bool tinyRssReader::dump(const char *libname) {
 
 int main(){
     tinyRssReader rssReader;
-    if(!rssReader.parseRss("coolshell.xml")) {
+    if(!rssReader.parseRss("../data/coolshell.xml")) {
         cout << "parse failed!" << endl;
         exit(1);
     }
