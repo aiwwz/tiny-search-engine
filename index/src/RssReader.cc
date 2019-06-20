@@ -1,9 +1,10 @@
-#include <iostream>
 #include <regex>
-#include "../include/MyRssReader.h"
+#include "../include/RssReader.h"
 #include "../include/tinyxml2.h"
-using std::cout; using std::endl;
+#include "../include/MyLogger.h"
 using namespace tinyxml2;
+using std::to_string;
+
 
 /* 将src中所有的<...>过滤掉 */
 void regexFilter(const string &src, string &des) {
@@ -12,11 +13,11 @@ void regexFilter(const string &src, string &des) {
     des = regex_replace(src, reg, ""); //将<与>之间包括<>全部替换为""
 }
 
-bool tinyRssReader::parseRss(const char *xmlPath) {
+bool RssReader::parseRss(const string &xmlPath) {
     //加载待解析xml文件
     XMLDocument doc;
-    if(XML_SUCCESS != doc.LoadFile(xmlPath)) {
-        cout << "Load XML file failed!" << endl;
+    if(XML_SUCCESS != doc.LoadFile(xmlPath.c_str())) {
+        LogWarn("Load XML file failed!");
         return false;
     }
     
@@ -41,6 +42,9 @@ bool tinyRssReader::parseRss(const char *xmlPath) {
         }
 
         tmpNode = item->FirstChildElement("content:encoded");
+        if(nullptr == tmpNode) { //若没有content, 则用description代替之
+            tmpNode = item->FirstChildElement("description");
+        }
         if(nullptr != tmpNode) {
             //使用正则表达式过滤无用的数据
             regexFilter(tmpNode->GetText(), tmpItem.content); 
@@ -55,7 +59,23 @@ bool tinyRssReader::parseRss(const char *xmlPath) {
     return true;
 }
 
-bool tinyRssReader::dump(const char *libname) {
+
+/* 存储到容器: 通过原生string方式 */
+void RssReader::store(vector<string> &vecPages) {
+    string page;
+    size_t size = m_rss.size();
+    for(size_t idx = 0; idx != size; ++idx) {
+        page = "<doc>\n    <docid>" 
+             + to_string(idx+1) + "</docid>\n    <title>"
+             + m_rss[idx].title + "</title>\n    <link>"
+             + m_rss[idx].link + "</link>\n    <content>"
+             + m_rss[idx].content + "\n</content>\n</doc>\n\n";
+        vecPages.push_back(page);
+    }
+}
+
+/* 存储到文件: 通过tinyxml2提供的接口
+bool RssReader::store(const string &libPath) {
     XMLDocument docs;
    
     XMLElement *node;
@@ -81,28 +101,12 @@ bool tinyRssReader::dump(const char *libname) {
         node->SetText(item.content.c_str());
         doc->InsertEndChild(node);
     }
-
-    if(XML_SUCCESS ==docs.SaveFile(libname)) {
+    if(XML_SUCCESS ==docs.SaveFile(libPath.c_str())) {
         return true;
     }
     else {
+        LogWarn("Save XML file faild!");
         return false;
     }
 }
-
-
-int main(){
-    tinyRssReader rssReader;
-    if(!rssReader.parseRss("../data/coolshell.xml")) {
-        cout << "parse failed!" << endl;
-        exit(1);
-    }
-
-    if(!rssReader.dump("../data/pagelib.dat")) {
-        cout << "save file failed!" << endl;
-        exit(1);
-    }
-
-    return 0;
-}
-
+*/

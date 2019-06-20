@@ -17,7 +17,7 @@ class DirScanner {
 public:
     DirScanner(Configure &config);
 
-    const vector<string>& getCorpusFiles() const;
+    const vector<string>& getCorpusPages() const;
     void print() const; //for debug
 
 private:

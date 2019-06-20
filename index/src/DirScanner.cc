@@ -53,7 +53,7 @@ inline void DirScanner::traverse(const string &corpusDir) {
     ::closedir(dir);
 }
 
-inline const vector<string>& DirScanner::getCorpusFiles() const {
+const vector<string>& DirScanner::getCorpusPages() const {
     return m_vecCorpus;
 }
 
@@ -62,4 +62,5 @@ void DirScanner::print() const {
     for(auto &it : m_vecCorpus) {
         cout << it << endl;
     }
+    cout << endl;
 }
