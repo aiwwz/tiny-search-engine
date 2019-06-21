@@ -10,7 +10,7 @@
 using namespace std;
  
 int main() {
-    tinyse::Configure config("../conf/offline.conf"); //加载配置文件
+    tinyse::Configure config("conf/offline.conf"); //加载配置文件
 
     tinyse::PageLib pageLib(config); //存储格式化后的网页和偏移库
     pageLib.doit();

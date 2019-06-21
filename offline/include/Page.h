@@ -35,6 +35,7 @@ public:
     string getTitle() const;
     string getContent() const;
     void clear();
+    void operator=(const Page &rhs);
 
 private:
     size_t m_docid;

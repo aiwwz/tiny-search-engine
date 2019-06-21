@@ -14,7 +14,7 @@ using std::to_string;
 string regexFilter(const string &src) {
     string pattern = "<.*?>"; //.*?的目的是采用最短匹配
     std::regex reg(pattern);
-    return regex_replace(src, reg, ""); //将<与>之间包括<>全部替换为""
+    return regex_replace(src, reg, "");
 }
 
 

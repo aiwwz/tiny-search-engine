@@ -43,7 +43,6 @@ void Page::parse(Configure &config, WordSegmentation &jieba, simhash::Simhasher 
     /* 求该Page的simhash */
     size_t topN = 20; //默认为10
     simhasher.make(m_content, topN, m_simhash); //计算simhash
-    cout << m_simhash << endl;
 }
 
 map<string, size_t>& Page::getWordsMap() {
@@ -71,6 +70,14 @@ void Page::clear() {
     m_simhash = 0;
 }
 
+/* 赋值 --> 仅修改内容, 不改动docid */
+void Page::operator=(const Page &rhs) {
+    m_title = rhs.m_title;
+    m_link = rhs.m_link;
+    m_content = rhs.m_content;
+    m_wordsMap = rhs.m_wordsMap;
+    m_simhash = rhs.m_simhash;
+}
 ostream& operator<<(ostream &os, const Page &page) {
     os << "<doc>\n"
        << "    <docid>"   << page.m_docid   << "</docid>\n"

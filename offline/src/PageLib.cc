@@ -60,7 +60,6 @@ void PageLib::dedup() {
             if(m_vecPages[i] == m_vecPages[j]) {
                 /* 两Page相似 --> 删除docid大的 */
                 LogInfo("Delete duplicate page: <%s> with <%s>", m_vecPages[i].getTitle().c_str(), m_vecPages[j].getTitle().c_str());
-                cout << m_vecPages[i].getDocID() << " == " << m_vecPages[j].getDocID() << endl;
                 m_vecPages[j] = m_vecPages.back();
                 m_vecPages.pop_back();
                 --j;

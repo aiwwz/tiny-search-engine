@@ -1,6 +1,6 @@
-SRCS:=$(wildcard *.cc)
+SRCS:=$(wildcard ./src/*.cc)
 OBJS:=$(patsubst %.cc,%.o,$(SRCS))
-ELF:=a.out
+ELF:= tinyse_offline
 CC:=g++
 CXXFLAGS:=-std=c++11 -g -Wall
 $(ELF):$(OBJS)
