@@ -43,6 +43,14 @@ void Page::parse(Configure &config, WordSegmentation &jieba, simhash::Simhasher 
     /* 求该Page的simhash */
     size_t topN = 20; //默认为10
     simhasher.make(m_content, topN, m_simhash); //计算simhash
+    /*
+    vector<std::pair<string, double>> res;
+    simhasher.extract(m_content, res, topN);
+    for(auto &it : res) {
+        cout << "[" << it.first << ":" << it.second << "] ";
+    }
+    cout << endl;
+    */
 }
 
 map<string, size_t>& Page::getWordsMap() {

@@ -1,15 +1,11 @@
-INC_DIR := ./include ./include/net ./include/base ./include/cppjieba
-SRC_DIR := ./src ./src/net ./src/base
-EXE_DIR := ./bin
+SRCS:=$(wildcard ./src/*.cc)
+OBJS:=$(patsubst %.cc,%.o,$(SRCS))
+ELF:= tinyse_online
+CC:=g++
+CXXFLAGS:=-std=c++11 -g -Wall
+$(ELF):$(OBJS)
+	g++ $^ -o $@ -lpthread -llog4cpp $(CXXFLAGS)
+.PHONY:clean
+clean:
+	rm -rf $(ELF) $(OBJS)
 
-CC := g++
-CPPFLAGS := -std=c++11 -g -Wall
-LIBS := -ljson -lpthread
-INC_FILE := $(addprefix -l, $(INC_DIR))
-CPP_FILE := $(wildcard ./src/*.cc) $(wildcard ./src/base/*.cc) $(wildcard ./src/net/*.cc)
-TARGET := tinyse
-
-$(TARGET) : $(CPP_FILE)
-			$(CC) $(CPPFLAGS) -o $@ $(CPP_FILE) $(INC_FILE) $(LIBS)
-
-clean: rm -rf $(TARGET)
