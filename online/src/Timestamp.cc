@@ -3,7 +3,7 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-06-15 21:03:38
 **********************************************/
-#include "Timestamp.h"
+#include "../include/Timestamp.h"
 #include <cstdio>
 #include <sys/time.h>
 using namespace tinyse;

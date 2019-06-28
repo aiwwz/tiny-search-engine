@@ -5,13 +5,12 @@
 **********************************************/
 #ifndef __CHANNEL_H__
 #define __CHANNEL_H__
-#include "Uncopyable.h"
 #include <functional>
 #include <iostream>
+#include "Uncopyable.h"
 using namespace std;
 
 namespace tinyse {
-namespace net {
 
 class EventLoop;
 
@@ -39,6 +38,7 @@ public:
     }
 
     void handleEvent();
+
     void enableReading() {
         m_events |= kReadEvent;
         update();
@@ -101,7 +101,6 @@ private:
     int         m_index;   //该Channel在poolfds中的下标
 };
 
-} //end of namespace net
 } //end of namespace tinyse
  
 #endif /* __CHANNEL_H__ */

@@ -3,12 +3,13 @@
 #include <log4cpp/PropertyConfigurator.hh>
 using namespace log4cpp;
 
-tinyLogger *tinyLogger::m_pInstance = nullptr;
-pthread_once_t tinyLogger::m_once_control = PTHREAD_ONCE_INIT;
+/* 初始化静态成员 */
+MyLogger *MyLogger::m_pInstance = nullptr;
+pthread_once_t MyLogger::m_once_control = PTHREAD_ONCE_INIT;
 
-tinyLogger::tinyLogger() : m_logger(Category::getRoot().getInstance("logger")) {
+MyLogger::MyLogger() : m_logger(Category::getRoot().getInstance("logger")) {
     try {
-        PropertyConfigurator::configure("../conf/log4cpp.conf");
+        PropertyConfigurator::configure("conf/log4cpp.conf");
     }
     catch(ConfigureFailure &err) {
         std::cerr << "Configure failure: " << err.what() << std::endl;
@@ -16,23 +17,23 @@ tinyLogger::tinyLogger() : m_logger(Category::getRoot().getInstance("logger")) {
     }
 }
 
-tinyLogger::~tinyLogger() {
+MyLogger::~MyLogger() {
     Category::shutdown();
 }
 
-void tinyLogger::error(const char *msg) {
+void MyLogger::error(const char *msg) {
     m_logger.error(msg);
 }
 
-void tinyLogger::warn(const char *msg) {
+void MyLogger::warn(const char *msg) {
     m_logger.warn(msg);
 }
 
-void tinyLogger::info(const char *msg) {
+void MyLogger::info(const char *msg) {
     m_logger.info(msg);
 }
 
-void tinyLogger::debug(const char *msg) {
+void MyLogger::debug(const char *msg) {
     m_logger.debug(msg);
 }
 

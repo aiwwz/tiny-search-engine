@@ -6,6 +6,7 @@
 #include "../include/EventLoop.h"
 #include "../include/Channel.h"
 #include "../include/Poller.h"
+#include "../include/MyLogger.h"
 #include <pthread.h>
 #include <assert.h>
 #include <sys/poll.h>
@@ -13,7 +14,6 @@
 #include <iostream>
 #include <sys/eventfd.h>
 using namespace tinyse;
-using namespace tinyse::net;
 using std::cout;  using std::endl;
 
 //__thread变量每个线程有一份独立实体, 各个线程互不干扰
@@ -35,15 +35,15 @@ EventLoop::EventLoop()
     , m_timerQueue(new TimerQueue(this))
     , m_wakeupFd(createEventfd())
     , m_wakeupChannel(new Channel(this, m_wakeupFd)){ 
-    if(p_eventLoopOfCurrentThread) {
-        cout << "Error: 该线程 " << m_threadID 
-             << " 已存在其他EventLoop: " << p_eventLoopOfCurrentThread << endl;
-        //logError("该线程:%d 已存在其他EventLoop: %d", m_threadID, p_eventLoopOfCurrentThread);
 
+    if(p_eventLoopOfCurrentThread) {
+        LogError("Another EventLoop %d exists in this thread %d", p_eventLoopOfCurrentThread, m_threadID);
+        exit(-1);
     }
     else {
         p_eventLoopOfCurrentThread = this;
     }
+
     m_wakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
     m_wakeupChannel->enableReading();
 }
@@ -64,12 +64,13 @@ bool EventLoop::isInLoopThread() const {
 }
 
 EventLoop* EventLoop::getEventLoopOfCurrentThread() {
-    return p_eventLoopOfCurrentThread ? p_eventLoopOfCurrentThread : nullptr;
+    return p_eventLoopOfCurrentThread; //如果当前线程不是IO线程的话, 返回nullptr
 }
 
 void EventLoop::loop() {
     assert(!m_looping);
-    assertInLoopThread();
+    assertInLoopThread(); //确保事件循环必须在IO线程执行
+    cout << "assert" << endl;
     m_looping = true;
     m_quit = false;
 
@@ -81,13 +82,15 @@ void EventLoop::loop() {
         }
         doPendingFunctors();
     }
-    cout << "EventLoop " << this << " stop looping" << endl;
+
+    LogInfo("EventLoop %d stop looping!", this);
     m_looping = false;
 }
 
 void EventLoop::abortNotInLoopThread() const {
-    cout << "Abort: EventLoop " << this << " 在线程tid = " << m_threadID
-         << " 中创建, 但当前线程是tid = " << pthread_self() << endl;
+    cout << "Abort: EventLoop " << this << " created in thread = " << m_threadID
+         << ", but current thread is " << pthread_self() << endl;
+    exit(-1);
 }
 
 void EventLoop::updateChannel(Channel *channel) {

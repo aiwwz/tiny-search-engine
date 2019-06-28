@@ -12,7 +12,6 @@
 #include <cstring>
 #include <cassert>
 using namespace tinyse;
-using namespace tinyse::net;
 using std::cout; using std::endl;
 
 int createTimerfd() {

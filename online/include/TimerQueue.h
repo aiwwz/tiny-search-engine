@@ -15,7 +15,6 @@
 #include <stdio.h>
 
 namespace tinyse {
-namespace net {
 
 using TimerCallback = std::function<void()>;
 
@@ -98,7 +97,6 @@ private:
     Channel m_timerfdChannel;
 };
 
-} //end of namespace net
 } //end of namespace tinyse
  
 #endif /* __TIMERQUEUE_H__ */

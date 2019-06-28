@@ -15,7 +15,7 @@
 #include <vector>
 #include <memory>
 
-BEGIN_NAMESPACE_NET
+namespace tinyse {
 
 class Channel;
 class Poller;
@@ -96,6 +96,6 @@ private:
     std::vector<Functor> m_pendingFunctors;
 };
 
-END_NAMESPACE_NET
+} //end of namespace tinyse
  
 #endif /* __EVENTLOOP_H__ */

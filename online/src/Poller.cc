@@ -11,7 +11,6 @@
 #include <iostream>
 using namespace std;
 using namespace tinyse;
-using namespace tinyse::net;
 
 Poller::Poller(EventLoop *loop) : m_ownerLoop(loop) { }
 

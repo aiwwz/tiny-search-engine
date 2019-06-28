@@ -7,8 +7,8 @@
 #include "../include/Channel.h"
 #include "../include/EventLoop.h"
 #include <iostream>
-using namespace tinyse::net;
 using namespace std;
+using namespace tinyse;
 
 const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI; 

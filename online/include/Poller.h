@@ -13,7 +13,6 @@
 struct pollfd;
  
 namespace tinyse {
-namespace net {
 
 class Channel;
 class EventLoop;
@@ -42,7 +41,6 @@ private:
     ChannelMap m_channels;  //fd到Channel*的映射
 };
 
-} //end of namespace net
 } //end of namespace tinyse
  
 #endif /* __POLLER_H__ */
