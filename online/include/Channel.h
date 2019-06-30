@@ -70,11 +70,11 @@ public:
     }
 
     //在Poller中使用
-    int index() const {
+    int index() const { //Channel对应的fd在m_pollfds数组中的下标
         return m_index;
     }
 
-    void setIndex(const int idx) {
+    void setIndex(const int idx) { //设置在m_pollfds数组中的下标
         m_index = idx;
     }
 

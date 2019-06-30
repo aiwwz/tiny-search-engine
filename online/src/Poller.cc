@@ -3,12 +3,13 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-06-15 10:15:44
 **********************************************/
-#include "../include/Poller.h"
-#include "../include/EventLoop.h"
-#include "../include/Channel.h"
 #include <sys/poll.h>
 #include <assert.h>
 #include <iostream>
+#include "../include/Poller.h"
+#include "../include/EventLoop.h"
+#include "../include/Channel.h"
+#include "../include/MyLogger.h"
 using namespace std;
 using namespace tinyse;
 
@@ -17,26 +18,31 @@ Poller::Poller(EventLoop *loop) : m_ownerLoop(loop) { }
 Poller::~Poller() { }
 
 Timestamp Poller::poll(int timeoutMs, ChannelList *activeChannels) {
+    //获得当前活动事件
     int numEvents = ::poll(&*m_pollfds.begin(), m_pollfds.size(), timeoutMs);
+
     Timestamp now(Timestamp::now());
+
     if(numEvents > 0) {
-        cout << numEvents << " events hanppended" << endl;
+        LogInfo("%d events happened!", numEvents);
+        //遍历m_pollfds, 找出所有活动事件fd, 将其对应的Channel填入activeChannels
         fillActiveChannels(numEvents, activeChannels);
     }
     else if(numEvents == 0) {
-        cout << "nothing happended" << endl;
+        LogInfo("timeout: nothing happended!");
     }
     else {
-        cout << "Error: Poller::poll()" << endl;
+        LogError("poll()");
     }
+
     return now;
 }
 
+/* 遍历m_pollfds, 找出所有活动事件fd, 将其对应的Channel填入activeChannels */
 void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
     for(auto pfd = m_pollfds.begin(); pfd != m_pollfds.end() && numEvents > 0; ++pfd) {
         if(pfd->revents > 0) {
             --numEvents; //避免做无用功
-            cout << "Poller::fillActiveChannels::active Fd = " << pfd->fd << endl;
             auto ch = m_channels.find(pfd->fd);
             assert(ch != m_channels.end());
             Channel *channel = ch->second;
@@ -47,6 +53,7 @@ void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
     } 
 }
 
+/* 维护和更新m_poolfds数组 */
 void Poller::updateChannel(Channel *channel) {
     assertInLoopThread();
     cout << "fd = " << channel->fd() << " events = " << channel->events() << endl;
