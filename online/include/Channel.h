@@ -33,6 +33,10 @@ public:
         m_writeCallback = cb;
     }
 
+    void setCloseCallback(const EventCallback &cb) {
+        m_closeCallback =  cb;
+    }
+
     void setErrorCallback(const EventCallback &cb) {
         m_errorCallback = cb;
     }
@@ -43,13 +47,24 @@ public:
         m_events |= kReadEvent;
         update();
     }
+
     void enableWriting() {
         m_events |= kWriteEvent;
         update();
     }
 
-    void enableAll() {
-        m_events = kReadEvent | kWriteEvent;
+    void disableReading() {
+        m_events &= ~kReadEvent;
+        update();
+    }
+
+    void disableWriting() {
+        m_events &= ~kWriteEvent;
+        update();
+    }
+    
+    void disableAll() {
+        m_events = kNoneEvent;
         update();
     }
     
@@ -68,6 +83,12 @@ public:
     void setRevents(const int revent) {
         m_revents = revent;
     }
+    
+    EventLoop* ownerLoop() const {
+        return m_loop;
+    }
+
+    //void remove();
 
     //在Poller中使用
     int index() const { //Channel对应的fd在m_pollfds数组中的下标
@@ -76,10 +97,6 @@ public:
 
     void setIndex(const int idx) { //设置在m_pollfds数组中的下标
         m_index = idx;
-    }
-
-    EventLoop* ownerLoop() const {
-        return m_loop;
     }
 
 private:
@@ -92,6 +109,7 @@ private:
 
     EventCallback m_readCallback;
     EventCallback m_writeCallback;
+    EventCallback m_closeCallback;
     EventCallback m_errorCallback;
 
     EventLoop  *m_loop;

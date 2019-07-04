@@ -6,6 +6,7 @@
 #include "../include/Acceptor.h"
 #include "../include/EventLoop.h"
 #include "../include/InetAddress.h"
+#include <poll.h>
 using namespace tinyse;
 
 int createNonblockSocket() { //创建非阻塞socket
@@ -40,8 +41,9 @@ void Acceptor::handleRead() {
     m_loop->assertInLoopThread();
     InetAddress peerAddr;
     int connfd = m_socket.accept(peerAddr); 
-    if(m_newConnectCallback) {
-        m_newConnectCallback(connfd, peerAddr);
+
+    if(m_newConnectionCallback) {
+        m_newConnectionCallback(connfd, peerAddr);
     }
     else {
         ::close(connfd);

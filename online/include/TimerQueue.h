@@ -28,9 +28,7 @@ public:
         , m_interval(interval)
         , m_repeat(interval > 0) { }
 
-    ~Timer() {
-        cout << "~Timer()!!!" << endl;
-    }
+    ~Timer() { }
     
     void run() const {
         m_timerCallback();
@@ -61,16 +59,16 @@ private:
 };
 
 
+/*
 class TimerID {
 public:
     TimerID(Timer *timer) : m_timer(timer) { } 
-    ~TimerID() {
-        cout << "~TimerID()!!!!!!!!!!!!" << endl;
-    }
+    ~TimerID() { }
     
 private:
     Timer *m_timer;
 };
+*/
 
 
 class TimerQueue : Uncopyable {
@@ -80,9 +78,9 @@ public:
     TimerQueue(EventLoop *loop);
     ~TimerQueue();
 
-    TimerID addTimer(const TimerCallback &cb, Timestamp when, double interval); 
+    void addTimer(const TimerCallback &cb, Timestamp when, double interval); 
     void addTimerInLoop(Timer *timer);
-    void cancel(TimerID timerID);
+    //void cancel(TimerID timerID);
 
 private:
     void handleRead();

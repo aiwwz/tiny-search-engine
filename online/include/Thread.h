@@ -25,6 +25,7 @@ public:
     void start();
     void join();
     pid_t tid() const;
+    bool started() const { return m_started; }
 
 private:
     static void* threadFunc(void*);

@@ -5,6 +5,7 @@
  **********************************************/
 #include "../include/TimerQueue.h"
 #include "../include/EventLoop.h"
+#include "../include/MyLogger.h"
 #include <unistd.h>
 #include <sys/timerfd.h>
 #include <iostream>
@@ -36,9 +37,9 @@ struct timespec howMuchTimeFromNow(Timestamp &when) {
 void readTimerfd(int timerfd, Timestamp now) {
     uint64_t howmany = 1;
     ssize_t n = ::read(timerfd, &howmany, sizeof(howmany));
-    cout  << "TimerQueue::readTimerfd " << howmany << " at " << now.toString() << endl;
-    if (n != sizeof howmany) {
-        cout << "TimerQueue::handleRead() reads " << n << " bytes instead of 8";
+    LogInfo("read %d at %s", howmany, now.toString().c_str());
+    if (n != sizeof(howmany)) {
+        LogWarn("TimerQueue::handleRead() reads %d bytes instead of 8", n);
     }
 }
 
@@ -66,13 +67,13 @@ TimerQueue::~TimerQueue() {
     ::close(m_timerfd);
 }
 
-TimerID TimerQueue::addTimer(const TimerCallback &cb, Timestamp when, double interval) {
+/* 仅负责转发 */
+void TimerQueue::addTimer(const TimerCallback &cb, Timestamp when, double interval) {
     Timer *timer = new Timer(cb, when, interval);
     m_loop->runInLoop(std::bind(&TimerQueue::addTimerInLoop, this, timer));
-    cout << "------" << endl;
-    return TimerID(timer);
 }
 
+/* 完成实际修改定时器列表的工作 */
 void TimerQueue::addTimerInLoop(Timer* timer) {
     m_loop->assertInLoopThread();
     bool earliestChanged = insert(timer);
@@ -118,7 +119,6 @@ void TimerQueue::handleRead() {
     Timestamp now(Timestamp::now());
     readTimerfd(m_timerfd, now);
     std::vector<Entry> expired = getExpired(now);
-    cout << "expired.size() = " << expired.size() << endl;
     for(auto &it : expired) {
         it.second->run(); 
     }
@@ -133,6 +133,7 @@ bool TimerQueue::insert(Timer* timer) {
         earliestChanged = true;
     }
     auto result = m_timers.insert(std::make_pair(when, timer));
+    (void)result; //防止编译warn
     assert(result.second);
     return earliestChanged;
 }

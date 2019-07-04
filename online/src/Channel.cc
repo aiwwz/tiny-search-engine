@@ -6,7 +6,9 @@
 #include <sys/poll.h> 
 #include "../include/Channel.h"
 #include "../include/EventLoop.h"
+#include "../include/MyLogger.h"
 #include <iostream>
+#include <cassert>
 using namespace std;
 using namespace tinyse;
 
@@ -15,12 +17,18 @@ const int Channel::kReadEvent = POLLIN | POLLPRI;
 const int Channel::kWriteEvent = POLLOUT;
 
 void Channel::update() {
-   m_loop->updateChannel(this); 
+   m_loop->updateChannel(this);
 }
+
+/*
+void Channel::remove() {
+    assert(isNoneEvent());
+}
+*/
 
 void Channel::handleEvent() {
     if(m_revents & POLLNVAL) {
-        cout << "Channel::handleEvent() POLLNVAL" << endl;
+        LogWarn("Channel::handleEvent() POLLNVAL");
     }
 
     if(m_revents & (POLLERR | POLLNVAL)) {

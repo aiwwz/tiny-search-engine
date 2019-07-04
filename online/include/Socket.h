@@ -45,7 +45,7 @@ public:
         struct sockaddr_in addr;
         bzero(&addr, sizeof(addr));
         socklen_t addrlen = sizeof(addr);
-        int connfd = ::accept(m_fd, static_cast<struct sockaddr*>((void*)(&addr)), &addrlen);
+        int connfd = ::accept4(m_fd, static_cast<struct sockaddr*>((void*)(&addr)), &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC); //使connfd上发生的I/O操作非阻塞
         if(connfd == -1) {
             perror("Socket: accept");
             exit(-1);

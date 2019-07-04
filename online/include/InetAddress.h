@@ -16,7 +16,7 @@ using std::string;
 
 namespace tinyse {
 
-/* 对struct sockaddr_in的简单封装 */
+/* 对struct sockaddr_in的简单封装, 能自动转换字节序 */
 class InetAddress {
 public:
     InetAddress(uint16_t port = 0) {

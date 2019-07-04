@@ -9,7 +9,7 @@ pthread_once_t MyLogger::m_once_control = PTHREAD_ONCE_INIT;
 
 MyLogger::MyLogger() : m_logger(Category::getRoot().getInstance("logger")) {
     try {
-        PropertyConfigurator::configure("conf/log4cpp.conf");
+        PropertyConfigurator::configure("../conf/log4cpp.conf");
     }
     catch(ConfigureFailure &err) {
         std::cerr << "Configure failure: " << err.what() << std::endl;

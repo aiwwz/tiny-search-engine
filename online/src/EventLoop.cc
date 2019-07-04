@@ -19,7 +19,7 @@ using std::cout;  using std::endl;
 //__thread变量每个线程有一份独立实体, 各个线程互不干扰
 __thread EventLoop *p_eventLoopOfCurrentThread = nullptr;
 
-static int createEventfd() {
+static int createEventfd() { //创建wakeupfd
     int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if(evtfd < 0) {
         perror("EventLoop::eventfd");
@@ -34,7 +34,7 @@ EventLoop::EventLoop()
     , m_poller(new Poller(this))
     , m_timerQueue(new TimerQueue(this))
     , m_wakeupFd(createEventfd())
-    , m_wakeupChannel(new Channel(this, m_wakeupFd)){ 
+    , m_wakeupChannel(new Channel(this, m_wakeupFd)) {
 
     if(p_eventLoopOfCurrentThread) {
         LogError("Another EventLoop %d exists in this thread %d", p_eventLoopOfCurrentThread, m_threadID);
@@ -44,11 +44,14 @@ EventLoop::EventLoop()
         p_eventLoopOfCurrentThread = this;
     }
 
+    //注册wakeupChannel
     m_wakeupChannel->setReadCallback(std::bind(&EventLoop::handleRead, this));
     m_wakeupChannel->enableReading();
 }
 
 EventLoop::~EventLoop() {
+    LogDebug("EventLoop %d of thread %d destructs in thread %d", this, m_threadID, pthread_self());
+    m_wakeupChannel->disableAll();
     assert(!m_looping);
     p_eventLoopOfCurrentThread = nullptr; //当前线程中已不存在EventLoop
 }
@@ -70,7 +73,6 @@ EventLoop* EventLoop::getEventLoopOfCurrentThread() {
 void EventLoop::loop() {
     assert(!m_looping);
     assertInLoopThread(); //确保事件循环必须在IO线程执行
-    cout << "assert" << endl;
     m_looping = true;
     m_quit = false;
 
@@ -99,10 +101,17 @@ void EventLoop::updateChannel(Channel *channel) {
     m_poller->updateChannel(channel);
 }
 
-void EventLoop::quit() {
+void EventLoop::removeChannel(Channel *channel) {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    //...
+    m_poller->removeChannel(channel);
+}
+
+void EventLoop::quit() { //设置结束标志
     m_quit = true;
     if(!isInLoopThread()) {
-        wakeup();
+        wakeup(); //唤醒EventLoop
     }
 }
 

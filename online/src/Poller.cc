@@ -56,7 +56,7 @@ void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
 /* 维护和更新m_poolfds数组 */
 void Poller::updateChannel(Channel *channel) {
     assertInLoopThread();
-    cout << "fd = " << channel->fd() << " events = " << channel->events() << endl;
+    LogInfo("fd = %d, events = %d", channel->fd(), channel->events());
     if(channel->index() < 0) { //添加新Channel
         assert(m_channels.find(channel->fd()) == m_channels.end());
         struct pollfd pfd;
@@ -78,8 +78,36 @@ void Poller::updateChannel(Channel *channel) {
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
         if(channel->isNoneEvent()) {
-            pfd.fd = -1; //忽略该pollfd
+            pfd.fd = -channel->fd() - 1; //忽略该pollfd(且防止fd为0)
         }
+    }
+}
+
+void Poller::removeChannel(Channel *channel) {
+    LogInfo("fd = %d", channel->fd());
+    assertInLoopThread();
+    assert(m_channels.find(channel->fd()) != m_channels.end());
+    assert(m_channels[channel->fd()] == channel);
+    assert(channel->isNoneEvent());
+    int idx = channel->index();
+    assert(idx >= 0 && idx < static_cast<int>(m_pollfds.size()));
+    const struct pollfd &pfd = m_pollfds[idx]; (void)pfd; //防编译warn
+    assert(pfd.fd == -channel->fd()-1 && pfd.events == channel->events());
+    size_t n = m_channels.erase(channel->fd()); (void)n; //防编译warn
+    assert(n == 1);
+
+    //优化, 防止删除元素时拷贝
+    if(static_cast<size_t>(idx) == m_pollfds.size() - 1) {
+        m_pollfds.pop_back();
+    }
+    else { //要删除元素非末尾元素
+        int backFd = m_pollfds.back().fd;
+        iter_swap(m_pollfds.begin() + idx, m_pollfds.end() - 1);
+        if(backFd < 0) {
+            backFd = -backFd - 1;
+        }
+        m_channels[backFd]->setIndex(idx); //更新channel
+        m_pollfds.pop_back();
     }
 }
 

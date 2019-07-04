@@ -32,20 +32,21 @@ public:
     bool isInLoopThread() const;
     static EventLoop* getEventLoopOfCurrentThread();
     void updateChannel(Channel *channel);
+    void removeChannel(Channel *channel);
     void quit();
 
-    TimerID runAt(const Timestamp &time, const TimerCallback &cb) {
-        return m_timerQueue->addTimer(cb, time, 0);
+    void runAt(const Timestamp &time, const TimerCallback &cb) {
+        m_timerQueue->addTimer(cb, time, 0);
     }
 
-    TimerID runAfter(double delay, const TimerCallback &cb) {
+    void runAfter(double delay, const TimerCallback &cb) {
         Timestamp time(addTime(Timestamp::now(), delay));
-        return runAt(time, cb);
+        runAt(time, cb);
     }
 
-    TimerID runEvery(double interval, const TimerCallback &cb) {
+    void runEvery(double interval, const TimerCallback &cb) {
         Timestamp time(addTime(Timestamp::now(), interval));
-        return m_timerQueue->addTimer(cb, time, interval);
+        m_timerQueue->addTimer(cb, time, interval);
     }
 
 
@@ -87,7 +88,7 @@ private:
     bool m_callingPendingFuntors;
     const  pthread_t m_threadID;
     Timestamp m_pollRuntime;
-    std::unique_ptr<Poller> m_poller;
+    std::unique_ptr<Poller> m_poller; //间接持有poller
     std::unique_ptr<TimerQueue> m_timerQueue;
     ChannelList m_activeChannels;
     int m_wakeupFd;
