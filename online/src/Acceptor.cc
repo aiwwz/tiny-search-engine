@@ -42,11 +42,13 @@ void Acceptor::handleRead() {
     InetAddress peerAddr;
     int connfd = m_socket.accept(peerAddr); 
 
-    if(m_newConnectionCallback) {
-        m_newConnectionCallback(connfd, peerAddr);
-    }
-    else {
-        ::close(connfd);
+    if(connfd >= 0) {
+        if(m_newConnectionCallback) {
+            m_newConnectionCallback(connfd, peerAddr);
+        }
+        else {
+            ::close(connfd);
+        }
     }
 }
 

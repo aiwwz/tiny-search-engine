@@ -35,6 +35,7 @@ public:
 
 private:
     void newConnection(int sockfd, const InetAddress &peerAddr);
+    void removeConnection(const TcpConnectionPtr &conn);
 
 private:
     EventLoop *m_loop;

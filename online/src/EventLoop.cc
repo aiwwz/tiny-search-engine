@@ -5,14 +5,14 @@
 **********************************************/
 #include "../include/EventLoop.h"
 #include "../include/Channel.h"
-#include "../include/Poller.h"
+#include "../include/Epoller.h"
 #include "../include/MyLogger.h"
 #include <pthread.h>
 #include <assert.h>
 #include <sys/poll.h>
-//#include "../include/tinyLogger.h"
 #include <iostream>
 #include <sys/eventfd.h>
+#include <signal.h>
 using namespace tinyse;
 using std::cout;  using std::endl;
 
@@ -28,10 +28,19 @@ static int createEventfd() { //创建wakeupfd
     return evtfd;
 }
 
+class IgnoreSigPipe {
+public:
+    IgnoreSigPipe() {
+        ::signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+IgnoreSigPipe initObj; //忽略SIGPIPE
+
 EventLoop::EventLoop()
     : m_looping(false)
     , m_threadID(pthread_self())
-    , m_poller(new Poller(this))
+    , m_poller(new Epoller(this))
     , m_timerQueue(new TimerQueue(this))
     , m_wakeupFd(createEventfd())
     , m_wakeupChannel(new Channel(this, m_wakeupFd)) {

@@ -18,8 +18,9 @@ class Buffer;
 
 using TcpConnectionPtr = shared_ptr<TcpConnection>;
 using ConnectionCallback = function<void(const TcpConnectionPtr&)>;
-//using MessageCallback = function<void(const TcpConnectionPtr&, Buffer*, Timestamp)>;
-using MessageCallback = function<void(const TcpConnectionPtr&, char*, size_t)>;
+using MessageCallback = function<void(const TcpConnectionPtr&, Buffer*)>;
+using CloseCallback = function<void(const TcpConnectionPtr&)>;
+using TimerCallback = function<void()>;
 
 } //end of namespace tinyse
 

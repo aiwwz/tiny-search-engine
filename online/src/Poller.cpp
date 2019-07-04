@@ -6,7 +6,7 @@
 #include <sys/poll.h>
 #include <assert.h>
 #include <iostream>
-#include "../include/Poller.h"
+#include "../include/Poller.hpp"
 #include "../include/EventLoop.h"
 #include "../include/Channel.h"
 #include "../include/MyLogger.h"
@@ -56,8 +56,8 @@ void Poller::fillActiveChannels(int numEvents, ChannelList *activeChannels) {
 /* 维护和更新m_poolfds数组 */
 void Poller::updateChannel(Channel *channel) {
     assertInLoopThread();
-    LogInfo("fd = %d, events = %d", channel->fd(), channel->events());
     if(channel->index() < 0) { //添加新Channel
+        LogInfo("add new fd = %d, events = %d", channel->fd(), channel->events());
         assert(m_channels.find(channel->fd()) == m_channels.end());
         struct pollfd pfd;
         pfd.fd = channel->fd();
@@ -69,12 +69,13 @@ void Poller::updateChannel(Channel *channel) {
         m_channels[pfd.fd] = channel;
     }
     else { //更新已有Channel
+        LogInfo("renew fd = %d, events = %d", channel->fd(), channel->events());
         assert(m_channels.find(channel->fd()) != m_channels.end());
         assert(m_channels[channel->fd()] == channel);
         int idx = channel->index();
         assert(idx >= 0 && idx < static_cast<int>(m_pollfds.size()));
         struct pollfd &pfd = m_pollfds[idx]; //通过下标可以在O(1)内更新已有Channel
-        assert(pfd.fd == channel->fd() || pfd.fd == -1);
+        assert(pfd.fd == channel->fd() || pfd.fd == -channel->fd()-1);
         pfd.events = static_cast<short>(channel->events());
         pfd.revents = 0;
         if(channel->isNoneEvent()) {
@@ -96,11 +97,11 @@ void Poller::removeChannel(Channel *channel) {
     size_t n = m_channels.erase(channel->fd()); (void)n; //防编译warn
     assert(n == 1);
 
-    //优化, 防止删除元素时拷贝
+    //优化到O(1)复杂度, 防止删除元素时拷贝
     if(static_cast<size_t>(idx) == m_pollfds.size() - 1) {
         m_pollfds.pop_back();
     }
-    else { //要删除元素非末尾元素
+    else { //要删除元素非末尾元素, 则将待删除的元素与最后一个元素交换
         int backFd = m_pollfds.back().fd;
         iter_swap(m_pollfds.begin() + idx, m_pollfds.end() - 1);
         if(backFd < 0) {

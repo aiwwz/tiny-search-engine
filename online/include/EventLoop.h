@@ -6,7 +6,6 @@
 #ifndef __EVENTLOOP_H__
 #define __EVENTLOOP_H__
 #include "Uncopyable.h" 
-//#include "../include/CurrentThread.h" //for gettid()
 #include "../include/Config.h"
 #include "TimerQueue.h"
 #include "../include/MutexLock.h"
@@ -18,7 +17,7 @@
 namespace tinyse {
 
 class Channel;
-class Poller;
+class Epoller;
 
 class EventLoop {
     using ChannelList = std::vector<Channel*>;
@@ -88,7 +87,7 @@ private:
     bool m_callingPendingFuntors;
     const  pthread_t m_threadID;
     Timestamp m_pollRuntime;
-    std::unique_ptr<Poller> m_poller; //间接持有poller
+    std::unique_ptr<Epoller> m_poller; //间接持有poller
     std::unique_ptr<TimerQueue> m_timerQueue;
     ChannelList m_activeChannels;
     int m_wakeupFd;

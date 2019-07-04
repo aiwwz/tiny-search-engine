@@ -20,10 +20,9 @@ class Channel : Uncopyable {
 public:
     Channel(EventLoop *loop, int fd)
         : m_loop(loop)
-        , m_fd(fd)    
-        , m_events(0) 
-        , m_revents(0)
-        , m_index(-1) { }
+        , m_fd(fd)  { }
+
+    ~Channel();
 
     void setReadCallback(const EventCallback &cb) {
         m_readCallback = cb;
@@ -33,7 +32,7 @@ public:
         m_writeCallback = cb;
     }
 
-    void setCloseCallback(const EventCallback &cb) {
+    void setCloseCallback(const EventCallback &cb) { //用于关闭Tcp连接
         m_closeCallback =  cb;
     }
 
@@ -61,6 +60,10 @@ public:
     void disableWriting() {
         m_events &= ~kWriteEvent;
         update();
+    }
+
+    bool isWriting() const {
+        return m_events & kWriteEvent;
     }
     
     void disableAll() {
@@ -113,10 +116,12 @@ private:
     EventCallback m_errorCallback;
 
     EventLoop  *m_loop;
-    const int   m_fd;      //负责该文件描述符的I/O事件分发
-    int         m_events;  //关注的I/O事件
-    int         m_revents; //当前活动的事件
-    int         m_index;   //该Channel在poolfds中的下标
+    const int   m_fd; //负责该文件描述符的I/O事件分发
+    int         m_events = 0;  //关注的I/O事件
+    int         m_revents = 0; //当前活动的事件
+    int         m_index = -1;  //该Channel在poolfds中的下标
+
+    bool m_eventHandling = false;
 };
 
 } //end of namespace tinyse

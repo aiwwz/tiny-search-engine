@@ -16,6 +16,10 @@ const int Channel::kNoneEvent = 0;
 const int Channel::kReadEvent = POLLIN | POLLPRI; 
 const int Channel::kWriteEvent = POLLOUT;
 
+Channel::~Channel() {
+    assert(!m_eventHandling);
+}
+
 void Channel::update() {
    m_loop->updateChannel(this);
 }
@@ -27,8 +31,16 @@ void Channel::remove() {
 */
 
 void Channel::handleEvent() {
+    m_eventHandling = true;
+
     if(m_revents & POLLNVAL) {
         LogWarn("Channel::handleEvent() POLLNVAL");
+    }
+
+    if((m_revents & POLLHUP) && !(m_revents & POLLIN)) {
+        if(m_closeCallback) {
+            m_closeCallback();
+        }
     }
 
     if(m_revents & (POLLERR | POLLNVAL)) {
@@ -48,4 +60,6 @@ void Channel::handleEvent() {
             m_writeCallback();
         }
     }
+    
+    m_eventHandling = false;
 }
