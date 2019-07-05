@@ -12,7 +12,7 @@
 namespace tinyse {
 
 /* 封装互斥锁mutex */
-class MutexLock : tinyse::Uncopyable {
+class MutexLock : Uncopyable {
     friend class MutexLockGuard;
 public:
     MutexLock() {
@@ -50,7 +50,7 @@ private:
 };
 
 /* 通过对象生命周期自动加/解锁 */
-class MutexLockGuard : tinyse::Uncopyable {
+class MutexLockGuard : Uncopyable {
 public:
     explicit MutexLockGuard(MutexLock &mutex) : m_mutex(mutex) {
         m_mutex.lock();

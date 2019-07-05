@@ -4,7 +4,6 @@
 * date:   2019-06-10 20:20:26
 **********************************************/
 #include "../include/Thread.h"
-//#include "../include/CurrentThread.h"
 #include <cstdio>
 #include <unistd.h>
 #include <syscall.h>
@@ -17,7 +16,6 @@ Thread::~Thread() {
         if(pthread_detach(m_pthid)) {
             perror("Thread.cc: pthread_detach");
         }
-        m_started = false;
     }
 }
 
@@ -44,12 +42,9 @@ void* Thread::threadFunc(void *obj) {
     thd->m_tid = pthread_self(); //设置当前线程id
     if(nullptr != thd) {
         thd->m_func();
+        return thd;
     }
     return nullptr;
-}
-
-pid_t Thread::tid() const {
-    return m_tid;
 }
 
 } //end of namespace tinyse
