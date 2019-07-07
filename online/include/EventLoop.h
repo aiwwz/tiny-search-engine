@@ -6,7 +6,6 @@
 #ifndef __EVENTLOOP_H__
 #define __EVENTLOOP_H__
 #include "Uncopyable.h" 
-#include "../include/Config.h"
 #include "TimerQueue.h"
 #include "../include/MutexLock.h"
 #include <sys/types.h>

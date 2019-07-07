@@ -1,17 +1,16 @@
 /*********************************************
 * file:   Page.h
 * author: AIWWZ(wzj1524@qq.com)
-* date:   2019-06-19 18:15:15
+* date:   2019-07-06 00:29:44
 **********************************************/
 #ifndef __PAGE_H__
 #define __PAGE_H__
-#include <string>
 #include <vector>
+#include <string>
 #include <map>
-#include <ostream>
-#include "Simhasher.hpp"
-using std::string;  using std::vector;  using std::map;
-using std::ostream;
+#include <set>
+using std::vector;  using std::string; 
+using std::map;  using std::set;
  
 namespace tinyse {
 
@@ -19,33 +18,31 @@ class Configure;
 class WordSegmentation;
 
 class Page {
-    friend ostream& operator<<(ostream &os, const Page &page);
-    friend bool operator==(const Page &lhs, const Page &rhs);
 public:
     Page() { }
+    Page(const string &doc, Configure &conf, WordSegmentation &jieba);
 
-    void setDocID(const size_t &docid);
-    void setTitle(const string &title);
-    void setLink(const string &url);
-    void setContent(const string &content);
-    void parse(Configure &config, WordSegmentation &jieba, simhash::Simhasher &simhasher);
-    map<string, size_t>& getWordsMap();
-    size_t getDocID() const;
-    string getTitle() const;
-    string getContent() const;
-    void clear();
-    void operator=(const Page &rhs);
+    int docid() const { return m_docid; }
+    string title() const { return m_title; }
+    string link() const { return m_link; }
+    string summary(const vector<string> &queryWords);
 
 private:
-    size_t m_docid;
+    void parseDoc(const string &doc, Configure &conf, WordSegmentation &jieba);
+    void calcTopK(vector<string> &wordVec, size_t K, set<string> &stopWords);
+    const static size_t topK = 20;
+
+private:
+    int m_docid;
     string m_title;
     string m_link;
     string m_content;
+    string m_summary;
 
-    map<string, size_t> m_wordsMap; //分词(去停用词)之后的词:词频
-    uint64_t m_simhash; //该Page的simhash值
+    vector<string> m_topWords;   //topK词
+    map<string, int> m_wordsMap; //<词, 频次>
 };
 
-} //end of namespace tinyse
+} //end of namespacei tinyse
  
 #endif /* __PAGE_H__ */

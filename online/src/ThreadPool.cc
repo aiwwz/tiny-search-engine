@@ -3,11 +3,13 @@
 * author: AIWWZ(wzj1524@qq.com)
 * date:   2019-07-05 16:41:40
 **********************************************/
+#include <iostream>
 #include <cassert>
 #include "../include/ThreadPool.h"
 #include "../include/Thread.h"
 #include "../include/MyLogger.h"
 using namespace tinyse;
+using std::cout;  using std::endl;
 using std::bind;
 
 ThreadPool::ThreadPool(const string &name) 
@@ -61,7 +63,6 @@ void ThreadPool::addTask(const Task &task) {
         MutexLockGuard lock(m_mutex);
         m_taskQue.push(task);
         m_cond.signal();
-        LogDebug("addTask()");
     }
 }
 
@@ -70,13 +71,11 @@ ThreadPool::Task ThreadPool::getTask() {
     while(m_taskQue.empty() && m_running) {
         m_cond.wait();
     }
-    LogInfo("~~~ I am wakeup!"); 
 
     Task task;
     if(!m_taskQue.empty()) {
         task = m_taskQue.front();
         m_taskQue.pop();
-        LogDebug("getTask()");
     }
     return task;
 }

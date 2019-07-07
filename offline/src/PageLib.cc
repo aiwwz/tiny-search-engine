@@ -83,7 +83,7 @@ void PageLib::buildInvertedIndex() {
     map<size_t, double> sumOfSquares; //一篇文档中所有词语权重的平方和
 
     size_t TF = 0, DF = 0;
-    double IDF = 0.0, W = 0;
+    double IDF = 0.0, W = 0.0;
     size_t N = m_vecPages.size(); //Page总数
     for(auto &index : m_invertedIndex) {
         DF = index.second.size(); //包含该词的Page数量
