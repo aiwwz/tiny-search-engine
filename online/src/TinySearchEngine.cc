@@ -58,7 +58,8 @@ void TinySearchEngine::onMessage(const TcpConnectionPtr &conn, Buffer *buf) {
     string msg(buf->retrieveAsString());
     size_t pos = msg.find('\n');
     msg = msg.substr(0, pos);
-    cout << msg << endl;
+    //cout << msg << endl;
+    LogInfo("%s", msg.c_str());
     m_pool.addTask(bind(&TinySearchEngine::doTask, this, conn, msg));
 }
 
